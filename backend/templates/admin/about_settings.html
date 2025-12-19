@@ -1,0 +1,400 @@
+{% extends "admin/base_site.html" %}
+{% load admin_urls %}
+{% load static %}
+
+{% block title %}About Settings | {{ block.super }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .about-settings-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .about-settings-header {
+        margin-bottom: 2rem;
+    }
+    
+    .about-settings-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+    }
+    
+    .about-settings-header p {
+        color: #6b7280;
+        font-size: 1rem;
+    }
+    
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .section-header {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid #ff8c00;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .section-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-content {
+        padding: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .form-group input[type="text"],
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.9375rem;
+        font-family: inherit;
+        transition: border-color 0.2s;
+    }
+    
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #ff8c00;
+        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+    }
+    
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .form-group.checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-group.checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .save-btn {
+        background: linear-gradient(135deg, #ff8c00 0%, #ff5500 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .save-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 140, 0, 0.3);
+    }
+    
+    .save-btn:active {
+        transform: translateY(0);
+    }
+    
+    .related-items {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .related-items h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+    }
+    
+    .related-items-list {
+        display: grid;
+        gap: 0.75rem;
+    }
+    
+    .related-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .related-item-info {
+        flex: 1;
+    }
+    
+    .related-item-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    .related-item-meta {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+    
+    .related-item-actions a {
+        color: #ff8c00;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-left: 1rem;
+    }
+    
+    .related-item-actions a:hover {
+        text-decoration: underline;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #6b7280;
+    }
+    
+    .empty-state p {
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state a {
+        color: #ff8c00;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .empty-state a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-settings-container">
+    <div class="about-settings-header">
+        <h1>About Page Settings</h1>
+        <p>Manage all About page sections in one place. Each section can be saved independently.</p>
+    </div>
+    
+    <!-- Story Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>📖 Story Section</h2>
+        </div>
+        <div class="section-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="story">
+                <div class="form-group">
+                    <label for="{{ story_form.title.id_for_label }}">Title</label>
+                    {{ story_form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ story_form.content.id_for_label }}">Content</label>
+                    {{ story_form.content }}
+                </div>
+                <div class="form-group checkbox">
+                    {{ story_form.is_active }}
+                    <label for="{{ story_form.is_active.id_for_label }}">Active (display on website)</label>
+                </div>
+                <button type="submit" class="save-btn">Save Story Section</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Mission Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>🎯 Mission Section</h2>
+        </div>
+        <div class="section-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="mission">
+                <div class="form-group">
+                    <label for="{{ mission_form.title.id_for_label }}">Title</label>
+                    {{ mission_form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ mission_form.content.id_for_label }}">Content</label>
+                    {{ mission_form.content }}
+                </div>
+                <div class="form-group checkbox">
+                    {{ mission_form.is_active }}
+                    <label for="{{ mission_form.is_active.id_for_label }}">Active (display on website)</label>
+                </div>
+                <button type="submit" class="save-btn">Save Mission Section</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Vision Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>👁️ Vision Section</h2>
+        </div>
+        <div class="section-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="vision">
+                <div class="form-group">
+                    <label for="{{ vision_form.title.id_for_label }}">Title</label>
+                    {{ vision_form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ vision_form.content.id_for_label }}">Content</label>
+                    {{ vision_form.content }}
+                </div>
+                <div class="form-group checkbox">
+                    {{ vision_form.is_active }}
+                    <label for="{{ vision_form.is_active.id_for_label }}">Active (display on website)</label>
+                </div>
+                <button type="submit" class="save-btn">Save Vision Section</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Values Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>💎 Values Section</h2>
+        </div>
+        <div class="section-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="values_header">
+                <div class="form-group">
+                    <label for="{{ values_section_form.title.id_for_label }}">Title</label>
+                    {{ values_section_form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ values_section_form.subtitle.id_for_label }}">Subtitle</label>
+                    {{ values_section_form.subtitle }}
+                </div>
+                <div class="form-group checkbox">
+                    {{ values_section_form.is_active }}
+                    <label for="{{ values_section_form.is_active.id_for_label }}">Active (display on website)</label>
+                </div>
+                <button type="submit" class="save-btn">Save Values Header</button>
+            </form>
+            
+            <div class="related-items">
+                <h3>Individual Values</h3>
+                {% if values %}
+                    <div class="related-items-list">
+                        {% for value in values %}
+                            <div class="related-item">
+                                <div class="related-item-info">
+                                    <div class="related-item-title">{{ value.icon }} {{ value.title }}</div>
+                                    <div class="related-item-meta">Order: {{ value.order }}</div>
+                                </div>
+                                <div class="related-item-actions">
+                                    <a href="{% url 'admin:api_aboutvalue_change' value.id %}">Edit</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>No values added yet.</p>
+                        <a href="{% url 'admin:api_aboutvalue_add' %}">Add First Value</a>
+                    </div>
+                {% endif %}
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'admin:api_aboutvalue_changelist' %}" style="color: #ff8c00; text-decoration: none; font-weight: 500;">Manage All Values →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Timeline Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>📅 Timeline Section</h2>
+        </div>
+        <div class="section-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="timeline_header">
+                <div class="form-group">
+                    <label for="{{ timeline_section_form.title.id_for_label }}">Title</label>
+                    {{ timeline_section_form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ timeline_section_form.subtitle.id_for_label }}">Subtitle</label>
+                    {{ timeline_section_form.subtitle }}
+                </div>
+                <div class="form-group checkbox">
+                    {{ timeline_section_form.is_active }}
+                    <label for="{{ timeline_section_form.is_active.id_for_label }}">Active (display on website)</label>
+                </div>
+                <button type="submit" class="save-btn">Save Timeline Header</button>
+            </form>
+            
+            <div class="related-items">
+                <h3>Timeline Items</h3>
+                {% if timeline_items %}
+                    <div class="related-items-list">
+                        {% for item in timeline_items %}
+                            <div class="related-item">
+                                <div class="related-item-info">
+                                    <div class="related-item-title">{{ item.year }} - {{ item.title }}</div>
+                                    <div class="related-item-meta">Order: {{ item.order }}</div>
+                                </div>
+                                <div class="related-item-actions">
+                                    <a href="{% url 'admin:api_abouttimelineitem_change' item.id %}">Edit</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>No timeline items added yet.</p>
+                        <a href="{% url 'admin:api_abouttimelineitem_add' %}">Add First Timeline Item</a>
+                    </div>
+                {% endif %}
+                <div style="margin-top: 1rem;">
+                    <a href="{% url 'admin:api_abouttimelineitem_changelist' %}" style="color: #ff8c00; text-decoration: none; font-weight: 500;">Manage All Timeline Items →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

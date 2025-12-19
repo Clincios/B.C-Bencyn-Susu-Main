@@ -1,0 +1,12 @@
+.ui-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.ui-card:hover {
+  box-shadow: var(--shadow-lg);
+}

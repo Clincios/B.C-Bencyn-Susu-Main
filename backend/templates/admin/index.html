@@ -1,0 +1,196 @@
+{% extends "admin/index.html" %}
+{% load admin_urls %}
+{% load admin_stats %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-card.primary {
+        background: linear-gradient(135deg, #ff8c00 0%, #ff5500 100%);
+    }
+    
+    .stat-card.success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    
+    .stat-card.info {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    }
+    
+    .stat-card.warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .quick-actions {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .quick-actions h2 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        color: #1a1a1a;
+        font-size: 1.25rem;
+    }
+    
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .quick-action-btn {
+        display: block;
+        padding: 0.75rem 1rem;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #495057;
+        text-align: center;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    .quick-action-btn:hover {
+        background: #ff8c00;
+        color: white;
+        border-color: #ff8c00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 140, 0, 0.2);
+    }
+    
+    .module-group {
+        margin-bottom: 2rem;
+    }
+    
+    .module-group-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .module-group-icon {
+        font-size: 1.5rem;
+    }
+    
+    .module-group-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
+    }
+    
+    .module-table {
+        width: 100%;
+    }
+    
+    .module-table th {
+        text-align: left;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .module-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f3f5;
+    }
+    
+    .module-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .addlink {
+        color: #ff8c00;
+        font-weight: 500;
+    }
+    
+    .addlink:hover {
+        color: #ff5500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-stats">
+    <div class="stat-card primary">
+        <div class="stat-label">Total Messages</div>
+        <div class="stat-number">{% get_contact_messages_count %}</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-label">Published Posts</div>
+        <div class="stat-number">{% get_published_posts_count %}</div>
+    </div>
+    <div class="stat-card info">
+        <div class="stat-label">Active Services</div>
+        <div class="stat-number">{% get_active_services_count %}</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-label">Unread Messages</div>
+        <div class="stat-number">{% get_unread_messages_count %}</div>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="quick-actions-grid">
+        <a href="{% url 'admin:api_contactmessage_add' %}" class="quick-action-btn">New Message</a>
+        <a href="{% url 'admin:api_blogpost_add' %}" class="quick-action-btn">New Blog Post</a>
+        <a href="{% url 'admin:api_update_add' %}" class="quick-action-btn">New Update</a>
+        <a href="{% url 'admin:api_service_add' %}" class="quick-action-btn">New Service</a>
+        <a href="{% url 'admin:api_testimonial_add' %}" class="quick-action-btn">New Testimonial</a>
+        <a href="{% url 'about_settings' %}" class="quick-action-btn">About Settings</a>
+        <a href="{% url 'admin:api_contactinformation_changelist' %}" class="quick-action-btn">Contact Settings</a>
+        <a href="{% url 'admin:api_heroimage_add' %}" class="quick-action-btn">Add Hero Image</a>
+        <a href="{% url 'admin:api_galleryitem_add' %}" class="quick-action-btn">🖼️ Add Gallery Item</a>
+        <a href="{% url 'admin:api_galleryitem_changelist' %}" class="quick-action-btn">📸 View Gallery</a>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}
+
