@@ -67,3 +67,44 @@
   background: var(--gray-50);
   color: var(--gray-900);
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ui-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .ui-button-sm {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem;
+    min-height: 40px;
+  }
+
+  .ui-button-md {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9375rem;
+  }
+
+  .ui-button-lg {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ui-button-sm {
+    font-size: 0.8125rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .ui-button-md {
+    font-size: 0.875rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .ui-button-lg {
+    font-size: 0.9375rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}

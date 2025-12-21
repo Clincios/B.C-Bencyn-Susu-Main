@@ -10,3 +10,16 @@
 .ui-card:hover {
   box-shadow: var(--shadow-lg);
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ui-card {
+    border-radius: var(--radius-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .ui-card {
+    border-radius: var(--radius-sm);
+  }
+}

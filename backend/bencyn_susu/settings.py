@@ -147,6 +147,23 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework settings
+# Rate limiting configuration
+# Increased limits to accommodate multiple API calls per page load
+# A single page load can make 5-10 API calls (hero-images, testimonials, services, etc.)
+# With navigation and refreshes, users need reasonable limits
+if DEBUG:
+    # More lenient limits for development
+    THROTTLE_RATES = {
+        'anon': '1000/hour',  # ~16 requests per minute - allows for development testing
+        'user': '5000/hour'    # Authenticated users: 5000 requests per hour
+    }
+else:
+    # Production limits - still generous but more controlled
+    THROTTLE_RATES = {
+        'anon': '500/hour',   # ~8 requests per minute - reasonable for normal usage
+        'user': '2000/hour'   # Authenticated users: 2000 requests per hour
+    }
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',  # Default, but individual views can override
@@ -158,10 +175,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour',  # Anonymous users: 100 requests per hour
-        'user': '1000/hour'  # Authenticated users: 1000 requests per hour
-    }
+    'DEFAULT_THROTTLE_RATES': THROTTLE_RATES
 }
 
 # CORS settings

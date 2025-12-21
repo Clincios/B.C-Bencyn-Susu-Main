@@ -326,6 +326,10 @@
 }
 
 @media (max-width: 768px) {
+  .about-hero {
+    padding: var(--spacing-2xl) var(--spacing-md);
+  }
+
   .about-title {
     font-size: 2rem;
   }
@@ -334,11 +338,81 @@
     font-size: 1.125rem;
   }
 
+  .story-content {
+    gap: var(--spacing-xl);
+  }
+
   .story-title {
     font-size: 2rem;
   }
 
+  .story-card-image,
+  .story-card {
+    height: 300px;
+    max-width: 100%;
+  }
+
   .values-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .value-card {
+    padding: var(--spacing-lg);
+  }
+
+  .mission-card {
+    padding: var(--spacing-lg);
+  }
+
+  .mission-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-title {
+    font-size: 1.75rem;
+  }
+
+  .about-subtitle {
+    font-size: 1rem;
+  }
+
+  .story-title {
+    font-size: 1.75rem;
+  }
+
+  .story-paragraph {
+    font-size: 1rem;
+  }
+
+  .story-card-image,
+  .story-card {
+    height: 250px;
+  }
+
+  .value-icon {
+    font-size: 2.5rem;
+  }
+
+  .value-title {
+    font-size: 1.25rem;
+  }
+
+  .mission-title {
+    font-size: 1.5rem;
+  }
+
+  .mission-text {
+    font-size: 1rem;
+  }
+
+  .timeline-content {
+    padding: var(--spacing-md);
+  }
+
+  .timeline-title {
+    font-size: 1.25rem;
   }
 }

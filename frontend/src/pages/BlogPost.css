@@ -566,12 +566,36 @@
 }
 
 @media (max-width: 480px) {
+  .blog-post-hero-image {
+    height: 200px;
+  }
+
+  .blog-post-title {
+    font-size: 1.75rem;
+  }
+
+  .blog-post-excerpt {
+    font-size: 1rem;
+  }
+
+  .blog-post-body {
+    font-size: 0.9375rem;
+  }
+
   .blog-images-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
   }
 
   .share-buttons {
     width: 100%;
     justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .lightbox-close {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
   }
 }
