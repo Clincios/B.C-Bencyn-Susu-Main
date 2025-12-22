@@ -18,19 +18,23 @@ This guide will help you deploy the B.C BENCYN SUSU backend to Render.
 
 ### 2. Python Version Configuration
 
-**IMPORTANT:** The `runtime.txt` file in the `backend/` directory specifies Python 3.12.7. This ensures compatibility with all packages.
+**IMPORTANT:** The `.python-version` file in the `backend/` directory (and root) specifies Python 3.12.7. This ensures compatibility with all packages.
 
-If you need to change the Python version, edit `backend/runtime.txt`:
+**Render uses `.python-version` file (not `runtime.txt` which is for Heroku).**
+
+If you need to change the Python version, edit `.python-version`:
 ```
-python-3.12.7
+3.12.7
 ```
 
 Supported versions:
-- `python-3.12.7` (recommended)
-- `python-3.11.8`
-- `python-3.10.13`
+- `3.12.7` (recommended)
+- `3.11.9`
+- `3.10.13`
 
 **Note:** Python 3.13 may cause build errors with some packages. Stick with 3.12 or 3.11.
+
+**Alternative:** You can also set `PYTHON_VERSION` environment variable in Render dashboard to `3.12.7`.
 
 ### 3. Environment Variables
 
@@ -103,9 +107,21 @@ Render will automatically:
 ## 🔧 Build Configuration
 
 ### Build Command
+
+**Option 1: Using build script (Recommended)**
 ```bash
-pip install -r requirements.txt
+chmod +x backend/build.sh && backend/build.sh
 ```
+
+**Option 2: Manual build command**
+```bash
+pip install --upgrade pip setuptools wheel && pip install -r backend/requirements.txt && cd backend && python manage.py collectstatic --noinput
+```
+
+The build script (`backend/build.sh`) automatically:
+- Upgrades pip, setuptools, and wheel
+- Installs all requirements
+- Collects static files
 
 ### Start Command
 ```bash
@@ -145,12 +161,15 @@ pip install -r requirements.txt && python manage.py migrate --noinput
 
 ### Build Fails with "KeyError: '__version__'"
 
-**Solution:** Ensure `runtime.txt` exists with Python 3.12.7:
-```
-python-3.12.7
-```
+**Solution:** 
+1. Ensure `.python-version` file exists in `backend/` directory with:
+   ```
+   3.12.7
+   ```
+2. Or set `PYTHON_VERSION` environment variable in Render dashboard to `3.12.7`
+3. Use the build script (`backend/build.sh`) which upgrades pip/setuptools first
 
-This error occurs when using Python 3.13, which some packages don't support yet.
+This error occurs when using Python 3.13, which some packages don't support yet. The `.python-version` file tells Render to use Python 3.12.7 instead.
 
 ### Build Fails with "subprocess-exited-with-error"
 
