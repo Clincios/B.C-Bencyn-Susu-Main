@@ -21,13 +21,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# In production, set SECRET_KEY in environment variables
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+# Set DEBUG=False in production via environment variable
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# Allowed hosts - add your domain for production
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+# Allowed hosts - REQUIRED for production
+# Set ALLOWED_HOSTS in environment variables with your domain(s)
+# Example: ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,api.yourdomain.com
+ALLOWED_HOSTS_RAW = config('ALLOWED_HOSTS', default='localhost,127.0.0.1')
+# Filter out empty strings to prevent validation errors
+ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_RAW.split(',') if host.strip()]
 
 
 # Application definition
@@ -79,13 +85,52 @@ WSGI_APPLICATION = 'bencyn_susu.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# For production, use PostgreSQL. Configure via DATABASE_URL or individual settings
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Check if DATABASE_URL is set (for production with PostgreSQL)
+DATABASE_URL = config('DATABASE_URL', default=None)
+
+if DATABASE_URL:
+    # Production: Use PostgreSQL from DATABASE_URL
+    # Format: postgresql://user:password@host:port/dbname
+    try:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+        }
+    except ImportError:
+        # Fallback if dj-database-url not installed
+        # Install with: pip install dj-database-url
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+else:
+    # Check if individual PostgreSQL settings are provided
+    DB_NAME = config('DB_NAME', default=None)
+    if DB_NAME:
+        # Use PostgreSQL with individual settings
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': DB_NAME,
+                'USER': config('DB_USER', default='postgres'),
+                'PASSWORD': config('DB_PASSWORD', default=''),
+                'HOST': config('DB_HOST', default='localhost'),
+                'PORT': config('DB_PORT', default='5432'),
+                'CONN_MAX_AGE': 600,
+            }
+        }
+    else:
+        # Development: Use SQLite (fallback)
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 
 # Password validation
@@ -179,37 +224,67 @@ REST_FRAMEWORK = {
 }
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = config(
+# REQUIRED for production - set your frontend domain(s)
+# Example: CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+CORS_ALLOWED_ORIGINS_RAW = config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000,http://127.0.0.1:3000'
-).split(',')
+)
+# Filter out empty strings to prevent CORS validation errors
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_RAW.split(',') if origin.strip()]
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Additional CORS settings for production
+if not DEBUG:
+    # Only allow configured origins in production
+    CORS_ALLOW_ALL_ORIGINS = False
+    # Allow credentials for authenticated requests
+    CORS_ALLOW_CREDENTIALS = True
+
 # Email settings (configure for production)
+# For production, use SMTP backend:
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@yourdomain.com')
+
+# Development: Use console backend
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
 # Security settings for production
 if not DEBUG:
-    # HTTPS/SSL
-    SECURE_SSL_REDIRECT = True
+    # HTTPS/SSL - Force HTTPS in production
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
-    # Session and CSRF
+    # Session and CSRF - Secure cookies only
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
     
     # Security headers
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
     
-    # HSTS
-    SECURE_HSTS_SECONDS = 31536000
+    # HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000, cast=int)  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    
+    # Additional security
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+    
+    # Prevent clickjacking
+    X_CONTENT_TYPE_OPTIONS = 'nosniff'
 
 # Logging configuration
+# Production: Configure file-based logging or use a logging service
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -218,12 +293,24 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        # Production: Add file handler
+        # 'file': {
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'filename': BASE_DIR / 'logs' / 'django.log',
+        #     'maxBytes': 1024 * 1024 * 10,  # 10 MB
+        #     'backupCount': 5,
+        #     'formatter': 'verbose',
+        # },
     },
     'root': {
         'handlers': ['console'],
@@ -235,5 +322,15 @@ LOGGING = {
             'level': config('DJANGO_LOG_LEVEL', default='INFO'),
             'propagate': False,
         },
+        'django.security': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
     },
 }
+
+# Production: Create logs directory if it doesn't exist
+if not DEBUG:
+    LOG_DIR = BASE_DIR / 'logs'
+    LOG_DIR.mkdir(exist_ok=True)
