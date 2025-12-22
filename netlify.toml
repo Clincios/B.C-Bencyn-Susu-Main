@@ -7,11 +7,17 @@
   
   # Publish directory - where the built files are located (relative to base)
   publish = "build"
-
+  
+  # Exclude REACT_APP_API_URL from secrets scanning (it's meant to be public in client-side code)
+  environment = { SECRETS_SCAN_OMIT_KEYS = "REACT_APP_API_URL" }
+  
 # Production context settings
 [context.production]
   command = "npm run build"
-  environment = { NODE_VERSION = "18" }
+  environment = { 
+    NODE_VERSION = "18",
+    SECRETS_SCAN_OMIT_KEYS = "REACT_APP_API_URL"
+  }
 
 # Plugin configuration for better performance
 [[plugins]]
