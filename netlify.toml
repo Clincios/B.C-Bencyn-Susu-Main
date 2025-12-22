@@ -14,10 +14,7 @@
 # Production context settings
 [context.production]
   command = "npm run build"
-  environment = { 
-    NODE_VERSION = "18",
-    SECRETS_SCAN_OMIT_KEYS = "REACT_APP_API_URL"
-  }
+  environment = { NODE_VERSION = "18", SECRETS_SCAN_OMIT_KEYS = "REACT_APP_API_URL" }
 
 # Plugin configuration for better performance
 [[plugins]]
