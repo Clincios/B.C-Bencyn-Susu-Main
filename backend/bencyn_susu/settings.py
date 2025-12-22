@@ -32,8 +32,29 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 # Set ALLOWED_HOSTS in environment variables with your domain(s)
 # Example: ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,api.yourdomain.com
 ALLOWED_HOSTS_RAW = config('ALLOWED_HOSTS', default='localhost,127.0.0.1')
+
+# Auto-detect Render.com deployment and add domain automatically
+# Render sets RENDER=true automatically, and provides RENDER_SERVICE_URL
+is_render = os.environ.get('RENDER') == 'true'
+render_service_url = os.environ.get('RENDER_SERVICE_URL', '')
+
+if is_render or render_service_url:
+    # Extract hostname from Render service URL
+    if render_service_url:
+        from urllib.parse import urlparse
+        # Handle both with and without protocol
+        if '://' not in render_service_url:
+            render_service_url = f'https://{render_service_url}'
+        parsed = urlparse(render_service_url)
+        if parsed.hostname and parsed.hostname not in ALLOWED_HOSTS_RAW:
+            # Add the specific Render domain to allowed hosts
+            ALLOWED_HOSTS_RAW = f"{ALLOWED_HOSTS_RAW},{parsed.hostname}"
+
 # Filter out empty strings to prevent validation errors
 ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_RAW.split(',') if host.strip()]
+
+# Additional safety: If DEBUG is False and we're on Render but domain not in ALLOWED_HOSTS,
+# Django will reject requests. The above should handle it, but if not, set ALLOWED_HOSTS explicitly.
 
 
 # Application definition

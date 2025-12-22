@@ -46,8 +46,12 @@ Set these in Render Dashboard → Environment:
 # Django Settings
 SECRET_KEY=your-generated-secret-key-here
 DEBUG=False
-ALLOWED_HOSTS=your-render-app.onrender.com,yourdomain.com
+# IMPORTANT: Replace with your actual Render service domain
+ALLOWED_HOSTS=b-c-bencyn-susu-main.onrender.com,yourdomain.com
 CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com,https://your-frontend.netlify.app
+```
+
+**Note:** The code now auto-detects Render domains from `RENDER_SERVICE_URL`, but it's recommended to set `ALLOWED_HOSTS` explicitly to avoid issues.
 
 # Database (Render provides this automatically for PostgreSQL)
 # DATABASE_URL is auto-set if you add a PostgreSQL database
