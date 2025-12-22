@@ -9,7 +9,6 @@ import './Home.css';
 const Home = () => {
   const [heroImage, setHeroImage] = useState(null);
   const [testimonials, setTestimonials] = useState([]);
-  const [isLoadingTestimonials, setIsLoadingTestimonials] = useState(true);
 
   useEffect(() => {
     // Fetch active hero image
@@ -45,8 +44,6 @@ const Home = () => {
       }
     } catch (error) {
       // Error fetching testimonials - will show empty section
-    } finally {
-      setIsLoadingTestimonials(false);
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { axiosInstance } from '../config/api';
@@ -16,11 +16,7 @@ export default function BlogPost() {
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
 
-  useEffect(() => {
-    fetchPost();
-  }, [id]);
-
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -31,7 +27,11 @@ export default function BlogPost() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchPost();
+  }, [fetchPost]);
 
   // Lightbox handlers
   const openLightbox = (image) => {
@@ -88,7 +88,6 @@ export default function BlogPost() {
 
   const hasImages = post.images && post.images.length > 0;
   const hasVideos = post.videos && post.videos.length > 0;
-  const hasMedia = hasImages || hasVideos;
 
   return (
     <PageErrorBoundary>

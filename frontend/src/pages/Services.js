@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { axiosInstance } from '../config/api';
@@ -11,12 +11,7 @@ const Services = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [headerImage, setHeaderImage] = useState(null);
 
-  useEffect(() => {
-    fetchServices();
-    fetchHeaderImage();
-  }, []);
-
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     try {
       const response = await axiosInstance.get(API_ENDPOINTS.SERVICES);
       // Handle paginated response from Django REST Framework
@@ -89,9 +84,9 @@ const Services = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchHeaderImage = async () => {
+  const fetchHeaderImage = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`${API_ENDPOINTS.PAGE_IMAGES}?page=services&section=header`);
       const dataArray = response.data.results || response.data;
@@ -102,7 +97,12 @@ const Services = () => {
       // Silently fall back to default if header image not found
       // Error is intentionally ignored
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchServices();
+    fetchHeaderImage();
+  }, [fetchServices, fetchHeaderImage]);
 
   const getDefaultServices = () => [
     {

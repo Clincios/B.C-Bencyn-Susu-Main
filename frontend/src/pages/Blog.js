@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { axiosInstance } from '../config/api';
@@ -18,11 +18,7 @@ export default function Blog() {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchPosts();
-  }, [selectedCategory, searchTerm]);
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = {};
@@ -52,7 +48,11 @@ export default function Blog() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedCategory, searchTerm]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   const categories = ['all', 'Financial Tips', 'Company News', 'Savings Guide', 'Investment', 'Community'];
 

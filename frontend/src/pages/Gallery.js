@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { axiosInstance } from '../config/api';
 import { API_ENDPOINTS } from '../config/api';
@@ -16,7 +16,6 @@ const VideoThumbnail = ({ videoUrl, title, onThumbnailReady }) => {
   const canvasRef = useRef(null);
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const [error, setError] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(true);
 
   useEffect(() => {
     if (!videoUrl || thumbnailUrl || error) return;
@@ -32,7 +31,6 @@ const VideoThumbnail = ({ videoUrl, title, onThumbnailReady }) => {
         video.currentTime = 0.1;
       } catch (e) {
         setError(true);
-        setIsGenerating(false);
       }
     };
 
@@ -48,19 +46,16 @@ const VideoThumbnail = ({ videoUrl, title, onThumbnailReady }) => {
         
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         setThumbnailUrl(dataUrl);
-        setIsGenerating(false);
         if (onThumbnailReady) {
           onThumbnailReady(dataUrl);
         }
       } catch (e) {
         setError(true);
-        setIsGenerating(false);
       }
     };
 
     const handleError = () => {
       setError(true);
-      setIsGenerating(false);
     };
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -107,11 +102,7 @@ export default function Gallery() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [videoThumbnails, setVideoThumbnails] = useState({});
 
-  useEffect(() => {
-    fetchGalleryItems();
-  }, [selectedFilter, mediaTypeFilter]);
-
-  const fetchGalleryItems = async () => {
+  const fetchGalleryItems = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = {};
@@ -138,7 +129,11 @@ export default function Gallery() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedFilter, mediaTypeFilter]);
+
+  useEffect(() => {
+    fetchGalleryItems();
+  }, [fetchGalleryItems]);
 
   const eventTypes = [
     { value: 'all', label: 'All Events' },

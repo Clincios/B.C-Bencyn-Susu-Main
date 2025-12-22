@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { axiosInstance } from '../config/api';
 import { API_ENDPOINTS } from '../config/api';
@@ -18,10 +18,6 @@ const Contact = () => {
   const [submitStatus, setSubmitStatus] = useState(null);
   const [contactInfo, setContactInfo] = useState(null);
   const [isLoadingContact, setIsLoadingContact] = useState(true);
-
-  useEffect(() => {
-    fetchContactInformation();
-  }, []);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -84,7 +80,7 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      const response = await axiosInstance.post(API_ENDPOINTS.CONTACT, formData);
+      await axiosInstance.post(API_ENDPOINTS.CONTACT, formData);
       setSubmitStatus({ type: 'success', message: 'Thank you! Your message has been sent successfully.' });
       setFormData({
         name: '',
@@ -111,7 +107,7 @@ const Contact = () => {
     }
   };
 
-  const fetchContactInformation = async () => {
+  const fetchContactInformation = useCallback(async () => {
     try {
       const response = await axiosInstance.get(API_ENDPOINTS.CONTACT_INFORMATION);
       // Handle paginated response from Django REST Framework
@@ -162,7 +158,11 @@ const Contact = () => {
     } finally {
       setIsLoadingContact(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchContactInformation();
+  }, [fetchContactInformation]);
 
   const getDefaultContactInfo = () => [
     {
