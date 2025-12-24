@@ -7,6 +7,11 @@ For production deployment, ensure:
 3. ALLOWED_HOSTS includes your domain
 4. CORS_ALLOWED_ORIGINS includes your frontend domain
 5. Database is configured for production (PostgreSQL recommended)
+6. Cloudinary credentials are set for media file storage:
+   - CLOUDINARY_CLOUD_NAME
+   - CLOUDINARY_API_KEY
+   - CLOUDINARY_API_SECRET
+   Get these from: https://cloudinary.com/console
 """
 
 from pathlib import Path
@@ -70,6 +75,13 @@ INSTALLED_APPS = [
     'corsheaders',
     'api.apps.ApiConfig',
 ]
+
+# Add Cloudinary storage for media files in production
+# Note: cloudinary must come before cloudinary_storage
+if not DEBUG:
+    staticfiles_index = INSTALLED_APPS.index('django.contrib.staticfiles')
+    INSTALLED_APPS.insert(staticfiles_index + 1, 'cloudinary')
+    INSTALLED_APPS.insert(staticfiles_index + 2, 'cloudinary_storage')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -199,8 +211,44 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# In production, use Cloudinary for media storage
+# In development, use local file storage
+if not DEBUG:
+    # Production: Use Cloudinary for media files
+    import cloudinary
+    import cloudinary.uploader
+    import cloudinary.api
+    
+    # Cloudinary configuration - set these in your environment variables
+    # Get from Cloudinary dashboard: https://cloudinary.com/console
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+        'API_KEY': config('CLOUDINARY_API_KEY', default=''),
+        'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+        'SECURE': True,  # Use HTTPS
+        'STATICFILES_MANIFEST_ROOT': BASE_DIR / 'staticfiles',
+    }
+    
+    # Configure Cloudinary SDK (for programmatic access if needed)
+    cloudinary.config(
+        cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+        api_key=CLOUDINARY_STORAGE['API_KEY'],
+        api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+        secure=CLOUDINARY_STORAGE['SECURE']
+    )
+    
+    # Use Cloudinary storage for media files
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    
+    # Media URL will be automatically handled by Cloudinary
+    MEDIA_URL = '/media/'
+    
+    # MEDIA_ROOT not needed in production with Cloudinary, but keep for compatibility
+    MEDIA_ROOT = BASE_DIR / 'media'
+else:
+    # Development: Use local file storage
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # File upload settings
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB max file size
